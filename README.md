@@ -85,17 +85,17 @@ uvicorn app.main:app --reload
 ### Project Structure
 
 ```plaintext
-automate-accounts/
-app/
-├── main.py             # FastAPI app entrypoint
-├── api/                # API route definitions
-├── crud/               # DB logic (CRUD)
-├── schemas/            # Pydantic models
-├── models/             # SQLAlchemy models
-├── services/           # Business logic (OCR, LLM)
-├── core/               # Dependencies (DB, DI, etc)
-├── utils/              # Logging and file utilities
-uploads/                # Stores uploaded PDF files
+receipt-iq/
+  app/
+  ├── main.py             # FastAPI app entrypoint
+  ├── api/                # API route definitions
+  ├── crud/               # DB logic (CRUD)
+  ├── schemas/            # Pydantic models
+  ├── models/             # SQLAlchemy models
+  ├── services/           # Business logic (OCR, LLM)
+  ├── core/               # Dependencies (DB, DI, etc)
+  ├── utils/              # Logging and file utilities
+  uploads/                # Stores uploaded PDF files
 ```
 
 ### API Endpoints
@@ -124,18 +124,6 @@ curl -X POST -H "Content-Type: application/json" \
   http://127.0.0.1:8000/process
 ```
 
-### Testing
-To run tests, make sure you have `pytest` installed:
-
-```bash 
-pip install pytest
-```
-
-Then run:
-
-```bash
-pytest tests/
-```
 ### Docker Support
 To run the application using Docker, you can use the provided `Dockerfile` and `docker-compose.yml`.
 ### 1. Build the Docker image
