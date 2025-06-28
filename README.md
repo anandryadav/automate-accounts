@@ -164,6 +164,6 @@ chmod 777 uploads  # Make it writable for all users
 This project is open-source under the MIT License.
 ### Contributing
 ### Issues
-If you find any bugs or have feature requests, please open an issue on our [GitHub Issues page](https://github.com/anandryadav/automate-accounts)
+If you find any bugs or have feature requests, please open an issue on our [GitHub Issues page](https://github.com/anandryadav/receipt-iq/issues)
 ### Contact
 For any questions or support, please contact us at [anandryadav@aol.com](mailto:anandryadav@aol.com)
