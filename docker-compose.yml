@@ -1,0 +1,12 @@
+
+services:
+  api:
+    build: .
+    container_name: receipt_api
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads  # Maps the local 'uploads' directory to the container's 'uploads'
+      - ./receipts.db:/app/receipts.db # Maps the SQLite database file directly

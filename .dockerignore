@@ -1,0 +1,19 @@
+# Git
+.git
+.gitignore
+
+# Python virtual environment
+venv
+.venv
+__pycache__
+*.pyc
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# IDE / OS specific
+.idea
+.vscode
+*.DS_Store
