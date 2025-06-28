@@ -9,5 +9,9 @@ __pycache__
 .vscode
 *.DS_Store
 .env
-# upload files
-#/uploads/
+
+# Ignore everything inside the uploads directory...
+uploads/*
+
+# ...except the uploads directory itself (so it stays in the repo)
+!uploads/.gitkeep
