@@ -1,8 +1,8 @@
-# ReceiptIQ: Automated Receipt Processing API
+# Receipt: Automated Receipt Processing API
 
 ## Project Overview
 
-ReceiptIQ is a web application with a set of REST APIs designed to automate the extraction of information from scanned PDF receipts. It uses OCR (Tesseract) to get raw text and an AI model (OpenAI GPT) to parse this text into a structured, queryable format, which is then stored in a SQLite database.
+Receipt is a web application with a set of REST APIs designed to automate the extraction of information from scanned PDF receipts. It uses OCR (Tesseract) to get raw text and an AI model (OpenAI GPT) to parse this text into a structured, queryable format, which is then stored in an SQLite database.
 
 ## Technology Stack
 
@@ -12,7 +12,7 @@ ReceiptIQ is a web application with a set of REST APIs designed to automate the 
 -   **ORM:** SQLAlchemy
 -   **OCR Engine:** Tesseract
 -   **PDF Handling:** PyPDF2, pdf2image
--   **AI Parsing:** OpenAI GPT-3.5 Turbo
+-   **AI Parsing:** OpenAI GPT-3.5 Turbo 
 -   **Async Server:** Uvicorn
 
 ## Prerequisites
@@ -29,7 +29,7 @@ Before you begin, ensure you have the following installed on your system:
 1.  **Clone the repository:**
     ```bash
     git clone <your-repo-url>
-    cd receipt-processor
+    cd automate-accounts
     ```
 
 2.  **Create a virtual environment:**
@@ -103,9 +103,4 @@ Full interactive API documentation (provided by Swagger UI) is available at:
 ```bash
   docker-compose up -d
 ```
- ### Scaling the Service
-- The docker-compose file you just created is the foundation for scaling. To scale your API service, you would: Switch to a production-grade database (like PostgreSQL) that can handle multiple connections. You'd add it as a new service in docker-compose.yml.
-- Use the --scale flag. For example, to run 3 instances of your API behind a load balancer (which you'd typically set up with something like Nginx or Traefik), you could use a command like:
-```bash
-  docker-compose up --build --scale api=3
-```
+
