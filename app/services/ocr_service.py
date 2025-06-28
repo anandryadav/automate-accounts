@@ -1,4 +1,3 @@
-import json
 import os
 from typing import Any, Tuple
 
@@ -6,38 +5,29 @@ import pytesseract
 from PyPDF2 import PdfReader
 from PyPDF2.errors import PdfReadError
 from dotenv import load_dotenv
-from openai import OpenAI
 from pdf2image import convert_from_path, exceptions
 
+from app.services.llm_service import LLMService
 from utils.logging import log
 
 logger = log(__name__)
 
+llm = LLMService()
 # Load environment variables from a .env file (for OPENAI_API_KEY)
 load_dotenv()
 
 # Fetch the API key from environment variables
-api_key = os.getenv("OPENAI_API_KEY")
-base_url = os.getenv("OPENAI_URL")
-model_id = os.getenv("MODEL_ID")
 poppler = os.getenv("POPPLER_PATH")
-
-# Check if the API key is available
-if not api_key:
-    logger.critical("OPENAI_API_KEY not found in .env file. Please add it.")
-    raise RuntimeError("OPENAI_API_KEY not found in .env file. Please add it.")
-
-# Initialize OpenAI client
-client = OpenAI(api_key=api_key, base_url=base_url)
 
 
 # --- 1. PDF Validation ---
 def validate_pdf(file_path: str) -> Tuple[bool, str]:
     """
-    Validates if a file is a structurally sound PDF.
-
+    Validates whether the file at the given path is a readable and intact PDF.
+    Args:
+        file_path (str): Absolute path to the PDF file.
     Returns:
-        A tuple (is_valid: bool, reason: str)
+        Tuple[bool, str]: A tuple with validation status and message.
     """
     try:
         with open(file_path, 'rb') as f:
@@ -52,7 +42,7 @@ def validate_pdf(file_path: str) -> Tuple[bool, str]:
         return False, f"An unexpected error occurred: {e}"
 
 
-# --- 2. The Main Extraction Function ---
+# --- 2. Main OCR + AI Extraction Pipeline ---
 def extract_data_from_receipt(file_path: str) -> dict[str, Any] | None:
     """
     Orchestrates the entire process of extracting structured data from a PDF receipt.
@@ -99,7 +89,7 @@ def extract_data_from_receipt(file_path: str) -> dict[str, Any] | None:
     logger.debug("--------------------")
 
     # Step 3: Use AI (GPT) to parse the raw text into structured JSON
-    structured_data = get_structured_data_from_gpt(raw_text)
+    structured_data = llm.parse_receipt_text(raw_text=raw_text)
 
     if not structured_data:
         logger.info("AI model failed to parse the text.")
@@ -107,50 +97,3 @@ def extract_data_from_receipt(file_path: str) -> dict[str, Any] | None:
 
     logger.debug(structured_data)
     return structured_data
-
-
-def get_structured_data_from_gpt(text: str) -> Any | None:
-    """
-    Sends text to OpenAI's GPT model and asks for structured JSON output.
-    """
-    prompt = f"""
-    You are an expert receipt processing assistant. Analyze the following raw OCR text from a receipt 
-    and extract the key information.
-
-    Please provide the output in a valid JSON format with the following structure:
-    {{
-      "merchant_name": "string",
-      "purchased_at": "YYYY-MM-DDTHH:MM:SS",
-      "total_amount": "float",
-      "items": [
-        {{
-          "description": "string",
-          "quantity": "float",
-          "price": "float"
-        }}
-      ]
-    }}
-
-    If a value is not found, use `null`. The `purchased_at` field should be a full ISO 8601 datetime if possible,
-    but `YYYY-MM-DD` is also acceptable. The `items` list should contain all purchased products.
-
-    Here is the OCR text:
-    ---
-    {text}
-    ---
-    """
-
-    try:
-        response = client.chat.completions.create(
-            model=model_id,  # A model that's good with JSON
-            response_format={"type": "json_object"},
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant designed to output JSON."},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        response_content = response.choices[0].message.content
-        return json.loads(response_content)
-    except Exception as e:
-        logger.error(f"Error calling OpenAI API or parsing JSON: {e}")
-        return None
