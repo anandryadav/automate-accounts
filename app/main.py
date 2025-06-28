@@ -1,11 +1,10 @@
 from fastapi import FastAPI
 
-from app.api import routes
-from app.database import engine
-from app.models import schemas as models
+from app.core.database import engine
+from app.models import Base
+from utils.logging import log
 
-models.Base.metadata.create_all(bind=engine)
-
+logger = log(__name__)
 # Create the FastAPI app instance
 app = FastAPI(
     title="ReceiptIQ API",
@@ -13,8 +12,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Include the API router from api/routes.py
-app.include_router(routes.router)
+
+@app.on_event("startup")
+def startup_event():
+    """
+    Startup logic to initialize database tables.
+    Ensures all models are imported and tables created if missing.
+    """
+    logger.info("Starting up: Creating tables if not exist...")
+    Base.metadata.create_all(bind=engine)
 
 
 @app.get("/", tags=["Root"])
