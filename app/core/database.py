@@ -2,17 +2,42 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Define the database URL for SQLite
-# The 'check_same_thread' is only needed for SQLite.
+# ----------------------------------------
+# Database Configuration
+# ----------------------------------------
+
+# Database URL format:
+# For SQLite: "sqlite:///./filename.db"
+# For PostgreSQL: "postgresql://user:password@host:port/dbname"
 DATABASE_URL = "sqlite:///./receipts.db"
 
-# Create the SQLAlchemy engine
+# ----------------------------------------
+# Create SQLAlchemy Engine
+# ----------------------------------------
+
+# For SQLite only: 'check_same_thread' must be False to allow
+# usage across multiple threads in FastAPI (like in async endpoints).
 engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
+    DATABASE_URL,
+    connect_args={"check_same_thread": False}
 )
 
-# Create a SessionLocal class. This will be our database session factory.
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# ----------------------------------------
+# Create a Session Factory
+# ----------------------------------------
 
-# Create a Base class. Our ORM models will inherit from this class.
+# `SessionLocal` is a class you can instantiate to create a new DB session.
+# It handles transaction scope and integrates cleanly with FastAPI's dependency system.
+SessionLocal = sessionmaker(
+    autocommit=False,  # Control when commit happens
+    autoflush=False,  # Avoid auto-flushing pending changes to DB
+    bind=engine  # Attach engine to session
+)
+
+# ----------------------------------------
+# Base ORM Class
+# ----------------------------------------
+
+# All your models will inherit from this Base class.
+# SQLAlchemy uses it to track table definitions and relationships.
 Base = declarative_base()
