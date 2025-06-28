@@ -10,4 +10,4 @@ __pycache__
 *.DS_Store
 .env
 # upload files
-#/uploads/*
+#/uploads/
