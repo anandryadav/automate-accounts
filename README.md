@@ -54,6 +54,14 @@ Before you begin, ensure you have the following installed on your system:
     uvicorn app.main:app --reload
     ```
     The application will be available at `http://127.0.0.1:8000`.
+6 ** Structure
+   -   `app/`: Contains the main application code.
+       -   `main.py`: Entry point for the FastAPI application.
+       -   `models.py`: Database models using SQLAlchemy.
+       -   `schemas.py`: Pydantic schemas for request and response validation.
+       -   `services/`: Contains service logic for OCR and AI processing.
+       -   `utils/`: Utility functions for file handling and text processing.
+       -   `api/`: Contains API route definitions.
 
 ## API Documentation
 
@@ -103,4 +111,5 @@ Full interactive API documentation (provided by Swagger UI) is available at:
 ```bash
   docker-compose up -d
 ```
+
 
