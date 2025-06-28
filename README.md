@@ -1,115 +1,169 @@
-# Receipt: Automated Receipt Processing API
+# ReceiptIQ: Automated Receipt Processing API
 
-## Project Overview
+ReceiptIQ is a modern, high-performance API for extracting structured data from scanned PDF receipts. It uses **OCR (Tesseract)** to extract raw text and **OpenAI's GPT** to parse and format this data into a structured format, all powered by **FastAPI** and persisted using **SQLAlchemy + SQLite**.
 
-Receipt is a web application with a set of REST APIs designed to automate the extraction of information from scanned PDF receipts. It uses OCR (Tesseract) to get raw text and an AI model (OpenAI GPT) to parse this text into a structured, queryable format, which is then stored in an SQLite database.
+---
+
+## Features
+
+- Upload scanned PDF receipts
+- Validate if file is a proper PDF
+- Extract structured receipt data using OpenAI GPT
+- Store and retrieve receipt + line item data
+- Query receipts and details via REST API
+- Built-in Swagger (OpenAPI) docs
+
+---
 
 ## Technology Stack
 
--   **Backend:** Python 3.9+
--   **Web Framework:** FastAPI
--   **Database:** SQLite
--   **ORM:** SQLAlchemy
--   **OCR Engine:** Tesseract
--   **PDF Handling:** PyPDF2, pdf2image
--   **AI Parsing:** OpenAI GPT-3.5 Turbo 
--   **Async Server:** Uvicorn
+| Layer         | Tech                    |
+|---------------|-------------------------|
+| Backend       | FastAPI (Python 3.9+)   |
+| OCR Engine    | Tesseract               |
+| AI Parsing    | OpenAI GPT-3.5 Turbo    |
+| PDF Handling  | PyPDF2, pdf2image       |
+| ORM / DB      | SQLAlchemy + SQLite     |
+| Server        | Uvicorn (ASGI)          |
+| Containerized | Docker + Docker Compose |
+
+---
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed on your system:
--   Python 3.9+
--   Tesseract OCR: [Installation Guide](https://tesseract-ocr.github.io/tessdoc/Installation.html)
--   Poppler: (Required by `pdf2image`)
-    -   macOS: `brew install poppler`
-    -   Ubuntu/Debian: `sudo apt-get install poppler-utils`
+Make sure these are installed before running the app:
 
-## Setup & Installation
+- Python 3.9+
+- **Tesseract OCR** — [Install Guide](https://tesseract-ocr.github.io/tessdoc/Installation.html)
+- **Poppler** — required by `pdf2image`
+    - macOS: `brew install poppler`
+    - Debian/Ubuntu: `sudo apt-get install poppler-utils`
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <your-repo-url>
-    cd automate-accounts
-    ```
+---
 
-2.  **Create a virtual environment:**
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate
-    ```
+## Installation & Setup
 
-3.  **Install the dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+### 1. Clone the repo
 
-4.  **Set up environment variables:**
-    Create a file named `.env` in the root directory and add your OpenAI API key:
-    ```
-    OPENAI_API_KEY="sk-..."
-    ```
+```bash
+git clone <your-repo-url>
+cd automate-accounts
 
-5.  **Run the application:**
-    ```bash
-    uvicorn app.main:app --reload
-    ```
-    The application will be available at `http://127.0.0.1:8000`.
-6 ** Structure
-   -   `app/`: Contains the main application code.
-       -   `main.py`: Entry point for the FastAPI application.
-       -   `models.py`: Database models using SQLAlchemy.
-       -   `schemas.py`: Pydantic schemas for request and response validation.
-       -   `services/`: Contains service logic for OCR and AI processing.
-       -   `utils/`: Utility functions for file handling and text processing.
-       -   `api/`: Contains API route definitions.
+### 2. Create a virtual environment (optional but recommended)
 
-## API Documentation
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+```
 
-Full interactive API documentation (provided by Swagger UI) is available at:
-**http://127.0.0.1:8000/docs**
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Set environment variables
+
+Create a `.env` file in the root directory with the following content:
+
+```plaintext
+OPENAI_API_KEY="sk-..."
+OPENAI_URL="https://api.openai.com/v1"
+MODEL_ID="gpt-3.5-turbo"
+POPPLER_PATH="/path/to/poppler/bin"  # Optional on Linux/macOS
+ ```
+
+### 5. Run the application
+
+```bash
+uvicorn app.main:app --reload
+```
+
+- App will be live at: http://127.0.0.1:8000
+- API Docs: http://127.0.0.1:8000/docs
+
+### Project Structure
+
+```plaintext
+automate-accounts/
+app/
+├── main.py             # FastAPI app entrypoint
+├── api/                # API route definitions
+├── crud/               # DB logic (CRUD)
+├── schemas/            # Pydantic models
+├── models/             # SQLAlchemy models
+├── services/           # Business logic (OCR, LLM)
+├── core/               # Dependencies (DB, DI, etc)
+├── utils/              # Logging and file utilities
+uploads/                # Stores uploaded PDF files
+```
 
 ### API Endpoints
 
--   `POST /upload`: Upload a PDF receipt.
--   `POST /validate`: Validate if the uploaded file is a correct PDF.
--   `POST /process`: Start the OCR and AI extraction process.
--   `GET /receipts`: List all processed receipts.
--   `GET /receipts/{id}`: Get details for a specific receipt.
+```plaintext
+POST /receipts/upload          # Upload a PDF receipt
+POST /receipts/parse           # Parse uploaded receipt
+GET /receipts/{receipt_id}     # Get receipt details
+GET /receipts/{receipt_id}/items # Get line items for a receipt
+```
 
-### Example Usage with `curl`
+### Example Usage (via curl)
 
-1.  **Upload:**
-    ```bash
-    curl -X POST -F "file=@/path/to/your/receipt.pdf" http://127.0.0.1:8000/upload
-    ```
+```bash
+# Upload a receipt
+curl -X POST -F "file=@/path/to/receipt.pdf" http://127.0.0.1:8000/upload
 
-2.  **Validate (assuming upload returned ID 1):**
-    ```bash
-    curl -X POST -H "Content-Type: application/json" -d '{"file_id": 1}' http://127.0.0.1:8000/validate
-    ```
+# Validate the uploaded receipt
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"file_id": 1}' \
+  http://127.0.0.1:8000/validate
 
-3.  **Process:**
-    ```bash
-    curl -X POST -H "Content-Type: application/json" -d '{"file_id": 1}' http://127.0.0.1:8000/process
-    ```
+# Process the receipt using OCR + AI
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"file_id": 1}' \
+  http://127.0.0.1:8000/process
+```
 
+### Testing
+To run tests, make sure you have `pytest` installed:
+
+```bash 
+pip install pytest
+```
+
+Then run:
+
+```bash
+pytest tests/
+```
 ### Docker Support
-    Step 1: Build the Docker Image
-    Open your terminal in the project's root directory (/receipt-processor) and run:
-    
-```bash
-    docker-compose build
-```
-    Step 2: Run the Container
-    Once the build is complete, start your application with:
+To run the application using Docker, you can use the provided `Dockerfile` and `docker-compose.yml`.
+### 1. Build the Docker image
 
 ```bash
-  docker-compose up 
+docker build -t receipt-iq .
+    or
+docker-compose build
 ```
- - To run it in the background (detached mode):
+### 2. Run the Docker container
 
 ```bash
-  docker-compose up -d
+  
+docker-compose up -d
 ```
 
+### Uploads Directory
+Make sure the `uploads/` directory exists and is writable by the application. You can create it manually:
 
+```bash
+mkdir uploads
+chmod 777 uploads  # Make it writable for all users
+```
+
+### License
+This project is open-source under the MIT License.
+### Contributing
+### Issues
+If you find any bugs or have feature requests, please open an issue on our [GitHub Issues page](https://github.com/anandryadav/automate-accounts)
+### Contact
+For any questions or support, please contact us at [anandryadav@aol.com](mailto:anandryadav@aol.com)
