@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from app.api import routes
 from app.core.database import engine
 from app.models import Base
 from utils.logging import log
@@ -21,6 +22,9 @@ def startup_event():
     """
     logger.info("Starting up: Creating tables if not exist...")
     Base.metadata.create_all(bind=engine)
+
+
+app.include_router(routes.router)
 
 
 @app.get("/", tags=["Root"])

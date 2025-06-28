@@ -37,10 +37,7 @@ router = APIRouter()
 # ----------------------------------------
 
 @router.post("/upload", response_model=payloads.UploadResponse)
-def upload_receipt(
-        file: UploadFile = File(...),
-        db: Session = Depends(get_db)
-):
+def upload_receipt(file: UploadFile = File(...), db: Session = Depends(get_db)):
     """
     Uploads a receipt file (PDF only).
     Saves the file and creates a metadata record in the database.
@@ -71,10 +68,7 @@ def upload_receipt(
 # ----------------------------------------
 
 @router.post("/validate", response_model=payloads.ValidationResponse)
-def validate_receipt(
-        request: payloads.ValidationRequest,
-        db: Session = Depends(get_db)
-):
+def validate_receipt(request: payloads.ValidationRequest, db: Session = Depends(get_db)):
     """
     Validates if a receipt file is a proper PDF.
     Updates validation status in the DB.
@@ -97,10 +91,7 @@ def validate_receipt(
 # ----------------------------------------
 
 @router.post("/process", response_model=payloads.ProcessResponse)
-def process_receipt(
-        request: payloads.ProcessRequest,
-        db: Session = Depends(get_db)
-):
+def process_receipt(request: payloads.ProcessRequest, db: Session = Depends(get_db)):
     """
     Processes the receipt file using OCR and AI extraction.
     Creates receipt + item records in the DB.
@@ -136,11 +127,7 @@ def process_receipt(
 # ----------------------------------------
 
 @router.get("/receipts", response_model=List[receipt.Receipt])
-def list_receipts(
-        skip: int = 0,
-        limit: int = 100,
-        db: Session = Depends(get_db)
-):
+def list_receipts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """
     Lists all receipts with their items.
     """
@@ -153,10 +140,7 @@ def list_receipts(
 # ----------------------------------------
 
 @router.get("/receipts/{receipt_id}", response_model=receipt.Receipt)
-def get_receipt_details(
-        receipt_id: int,
-        db: Session = Depends(get_db)
-):
+def get_receipt_details(receipt_id: int, db: Session = Depends(get_db)):
     """
     Retrieves a single receipt by ID with full item detail.
     """
